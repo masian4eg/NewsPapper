@@ -45,6 +45,12 @@ class Post(models.Model):
     text_news = models.TextField()
     rating = models.IntegerField(default=0)
 
+    def get_categories(self):
+        result = []
+        for category in self.category.all():
+            result.append(category)
+        return result
+
     def like(self):
         self.rating += 1
         self.save()
@@ -56,6 +62,9 @@ class Post(models.Model):
     def preview(self):
         size = 124 if len(self.text_news) > 124 else len(self.text_news)
         return self.text_news[:size] + '...'
+
+    def get_absolute_url(self):
+        return f'/news/{self.id}'
 
 
 class PostCategory(models.Model):
