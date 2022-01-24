@@ -16,6 +16,7 @@ class NewsList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())
         context['time_now'] = datetime.utcnow()
         return context
 
