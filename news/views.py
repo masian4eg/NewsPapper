@@ -1,10 +1,14 @@
-#from django.shortcuts import render
+from django.shortcuts import render, redirect
 from datetime import datetime
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from .models import Post, Category, PostCategory
 from .filters import PostFilter
 from django.core.paginator import Paginator
 from .forms import PostForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
+from django.contrib.auth.models import Group
+from django.contrib.auth.decorators import login_required
 
 
 class NewsList(ListView):
@@ -53,9 +57,10 @@ class PostCreateView(CreateView):
 
 
 # дженерик для редактирования объекта
-class PostUpdateView(UpdateView):
+class PostUpdateView(UpdateView, LoginRequiredMixin):
     template_name = 'new_create.html'
     form_class = PostForm
+    login_required = ('new_update`')
 
     # метод get_object мы используем вместо queryset, чтобы получить информацию об объекте, который мы собираемся редактировать
     def get_object(self, **kwargs):
@@ -68,3 +73,21 @@ class PostDeleteView(DeleteView):
     template_name = 'new_delete.html'
     queryset = Post.objects.all()
     success_url = '/news/'
+
+
+class IndexView(LoginRequiredMixin, TemplateView):
+    template_name = 'protect/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_not_authors'] = not self.request.user.groups.filter(name='authors').exists()
+        return context
+
+
+@login_required
+def upgrade_me(request):
+    user = request.user
+    authors_group = Group.objects.get(name='authors')
+    if not request.user.groups.filter(name='authors').exists():
+        authors_group.user_set.add(user)
+    return redirect('/')

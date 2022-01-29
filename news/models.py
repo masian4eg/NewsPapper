@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from allauth.account.forms import SignupForm
+from django.contrib.auth.models import Group
 
 
 class Author(models.Model):
@@ -86,3 +88,12 @@ class Comment(models.Model):
     def dislike(self):
         self.rating -= 1
         self.save()
+
+
+class CommonSignupForm(SignupForm):
+
+    def save(self, request):
+        user = super(CommonSignupForm, self).save(request)
+        common_group = Group.objects.get(name='common')
+        common_group.user_set.add(user)
+        return user
