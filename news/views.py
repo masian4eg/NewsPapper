@@ -5,7 +5,7 @@ from .models import Post, Category, PostCategory
 from .filters import PostFilter
 from django.core.paginator import Paginator
 from .forms import PostForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import TemplateView
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
@@ -51,16 +51,18 @@ class FilterPostView(ListView):
 
 
 # дженерик для создания объекта. Надо указать только имя шаблона и класс формы, который мы написали в прошлом юните. Остальное он сделает за вас
-class PostCreateView(CreateView):
+class PostCreateView(CreateView, PermissionRequiredMixin):
     template_name = 'new_create.html'
+    permission_required = ('new_create.html')
     form_class = PostForm
 
 
 # дженерик для редактирования объекта
-class PostUpdateView(UpdateView, LoginRequiredMixin):
+class PostUpdateView(UpdateView, LoginRequiredMixin, PermissionRequiredMixin):
     template_name = 'new_create.html'
     form_class = PostForm
     login_required = ('new_update`')
+    permission_required = ('new_update`')
 
     # метод get_object мы используем вместо queryset, чтобы получить информацию об объекте, который мы собираемся редактировать
     def get_object(self, **kwargs):
@@ -81,6 +83,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['is_not_authors'] = not self.request.user.groups.filter(name='authors').exists()
+        context['is_auth'] = self.request.user.is_authenticated
         return context
 
 
@@ -91,3 +94,5 @@ def upgrade_me(request):
     if not request.user.groups.filter(name='authors').exists():
         authors_group.user_set.add(user)
     return redirect('/')
+
+
