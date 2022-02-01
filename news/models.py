@@ -28,6 +28,11 @@ class Author(models.Model):
 
 class Category(models.Model):
     name = models.CharField(unique=True, max_length=150)
+    # поле для хранения подписавшихся на эту категорию пользователей
+    subscribed_users = models.ManyToManyField(User, related_name='subscribed_categories')
+
+    def __str__(self):
+        return self.name
 
 
 class Post(models.Model):
@@ -46,6 +51,12 @@ class Post(models.Model):
     name_news = models.CharField(max_length=256)
     text_news = models.TextField()
     rating = models.IntegerField(default=0)
+
+    def get_comments(self):
+        result = []
+        for comment in self.comments.all():
+            result.append(comment)
+        return result
 
     def get_categories(self):
         result = []

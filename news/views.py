@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.views.generic import TemplateView
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 
 
 class NewsList(ListView):
@@ -51,10 +52,18 @@ class FilterPostView(ListView):
 
 
 # дженерик для создания объекта. Надо указать только имя шаблона и класс формы, который мы написали в прошлом юните. Остальное он сделает за вас
-class PostCreateView(CreateView, PermissionRequiredMixin):
+class PostCreateView(CreateView, PermissionRequiredMixin, LoginRequiredMixin):
     template_name = 'new_create.html'
     permission_required = ('new_create.html')
     form_class = PostForm
+
+    def post(self, request, *args, **kwargs):
+        send_mail(
+            subject=f'{Post.name_news}',
+            message='Привет, новая статья в твоем разделе!',
+            from_email='masian4eg@yandex.ru',
+            recipient_list=['maxi4eg@mail.ru']
+        )
 
 
 # дженерик для редактирования объекта
@@ -96,3 +105,24 @@ def upgrade_me(request):
     return redirect('/')
 
 
+@login_required
+def subscribe_category(request):
+    user = request.user  # получаем из реквеста самого пользователя
+    cat_id = request.POST['cat_id']  # получаем из реквеста то, что пришло из формы через ПОСТ
+    category = Category.objects.get(pk=int(cat_id))  # получаем категорию через cat_id, который пришёл через ПОСТ через скрытое поле
+
+    # если связь пользователя с категорией не создана,
+    # второй вариант - проверять имя кнопки, которая пришла с реквестом
+    # и условие строить уже на этом
+    if user not in category.subscribed_users.all():
+        # добавляем пользователя в связь с категорией
+        category.subscribed_users.add(user)
+
+    # а если связь уже есть, то отписываем, т.е. удаляем из этой связи
+    else:
+        category.subscribed_users.remove(user)
+
+    # после чего возвращаем на предыдущую страницу, которую берём из реквеста
+    # она хранится в META, а это словарь, поэтому достаём через гет
+    # если этого ключа нет, то возвращается рут и редирект кидает в корень
+    return redirect(request.META.get('HTTP_REFERER', '/'))
