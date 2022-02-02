@@ -8,9 +8,9 @@ News
 {% load custom_filters %}
 <!-- В контенте на странице мы выводим сам товар, ID которого было передано в адрес -->
 {% block content %}
-<h1>{{ post.name_news|censor }}</h1>
-    <p>{{ post.text_news|censor }}</p>
-    <p>Автор: <b>{{ post.author.user.username }}</b></p>
+<h1>{{ new.name_news|censor }}</h1>
+    <p>{{ new.text_news|censor }}</p>
+    <p>Автор: <b>{{ new.author.user.username }}</b></p>
     <div>Категории:
         {% for cat in post.get_categories.all %}
 
@@ -34,16 +34,16 @@ News
             {% endif %}
 
         {% endfor %} </div>
-    <p><i>Дата: {{ post.time_post|date:'d E Y, H:i' }}</i></p>
+    <p><i>Дата: {{ new.time_post|date:'d E Y, H:i' }}</i></p>
 
-    {% if post.get_comments %}
+    {% if new.get_comments %}
     <table>
-    {% for comment in post.get_comments %}
+    {% for comment in new.get_comments %}
         <tr>
             <td>
-                <p>{{ comment.comment }}</p>
-                <p><i>{{ comment.time_comment }}</i></p>
-                <p><b>{{ comment.user.username }}</b></p>
+                <p>{{ new.comment }}</p>
+                <p><i>{{ new.time_comment }}</i></p>
+                <p><b>{{ new.user.username }}</b></p>
             </td>
         </tr>
     {% endfor %}

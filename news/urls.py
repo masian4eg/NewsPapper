@@ -4,6 +4,7 @@ from .views import upgrade_me, subscribe_category
 
 urlpatterns = [
     path('', NewsList.as_view()),
+    path('protect/', IndexView.as_view()),
     path('<int:pk>', NewsDetail.as_view(), name='new'),
     path('search/', FilterPostView.as_view()),
     path('create/', PostCreateView.as_view(), name='new_create'),  # Ссылка на создание новости

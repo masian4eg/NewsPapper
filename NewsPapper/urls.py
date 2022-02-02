@@ -25,8 +25,8 @@ def redirect_view(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', redirect_view),
+    path('', include('news.urls')),
     path('pages/', include('django.contrib.flatpages.urls')),
-    path('news/', include('news.urls')),
+    path('news/', include(('news.urls', 'news'), namespace='news')),
     path('accounts/', include('allauth.urls')),
 ]

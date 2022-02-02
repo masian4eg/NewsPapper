@@ -57,7 +57,7 @@ class PostCreateView(CreateView, PermissionRequiredMixin, LoginRequiredMixin):
     permission_required = ('new_create.html')
     form_class = PostForm
 
-    def post(self, request, *args, **kwargs):
+    def mail_post(self, request, *args, **kwargs):
         send_mail(
             subject=f'{Post.name_news}',
             message='Привет, новая статья в твоем разделе!',
