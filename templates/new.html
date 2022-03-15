@@ -1,0 +1,80 @@
+<!--  наследуемся от шаблона default.html, который мы создавали ещё во времена flatpages -->
+{% extends 'flatpages/default.html' %}
+
+<!-- Название у нас будет products -->
+{% block title %}
+News
+{% endblock title %}
+{% load custom_filters %}
+<!-- В контенте на странице мы выводим сам товар, ID которого было передано в адрес -->
+{% block content %}
+<h1>{{ new.name_news|censor }}</h1>
+    <p>{{ new.text_news|censor }}</p>
+    <p>Автор: <b>{{ new.author.user.username }}</b></p>
+    <div>Категории:
+        {% for cat in post.get_categories.all %}
+
+            {{ cat.name }}
+
+            <!-- если пользователь авторизован, то показываем форму подписки -->
+            {% if is_auth %}
+            <form action="/subscribe/" method="POST">
+                {% csrf_token %}
+
+                <!-- передаём через скрытое поле id категории -->
+                <input type="hidden" name="cat_id" value="{{ cat.id }}">
+                <!-- если пользователя нет в категориях то отображаем кнопку Подписаться-->
+                {% if current_user not in cat.subscribed_users.all %}
+                <input type="submit" name="subscribe_button" value="Подписаться">
+                {% else %}
+                <!-- если пользователь есть в категориях то отображаем кнопку Отписаться-->
+                <input type="submit" name="unsubscribe_button" value="Отписаться">
+                {% endif %}
+            </form>
+            {% endif %}
+
+        {% endfor %} </div>
+    <p><i>Дата: {{ new.time_post|date:'d E Y, H:i' }}</i></p>
+
+    {% if new.get_comments %}
+    <table>
+    {% for comment in new.get_comments %}
+        <tr>
+            <td>
+                <p>{{ new.comment }}</p>
+                <p><i>{{ new.time_comment }}</i></p>
+                <p><b>{{ new.user.username }}</b></p>
+            </td>
+        </tr>
+    {% endfor %}
+
+    </table>
+        {% else %}
+        <p>Комментариев нет</p>
+    {% endif %}
+<!--<h1>{{ new }}</h1>-->
+<!--<table>-->
+<!--    <tr>-->
+<!--        <td>-->
+<!--            Автор<br>-->
+<!--            {{ new.author }}-->
+<!--        </td>-->
+<!--        <td>-->
+<!--            Заголовок<br>-->
+<!--            {{ new.name_news }}-->
+<!--        </td>-->
+<!--        <td>-->
+<!--            Дата публикации<br>-->
+<!--            {{ new.time_post|date:'d-M-Y, H:i' }}-->
+<!--        </td>-->
+<!--        <td>-->
+<!--            Тип<br>-->
+<!--            {{ new.post_type }}-->
+<!--        </td>-->
+<!--        <td>-->
+<!--            Текст новости<br>-->
+<!--            {{ new.text_news }}-->
+<!--        </td>-->
+<!--    </tr>-->
+<!--</table>-->
+{% endblock content %}
